@@ -2,21 +2,23 @@ name: Notion Watcher
 
 on:
   schedule:
-    - cron: "0 0,12 * * *"   # UTC 00:00、12:00 → 台灣 12:00、19:00
-  workflow_dispatch: {}
+    - cron: "0 0,12 * * *"   # 每天 UTC 00:00、12:00（台灣 08:00、20:00）
+  workflow_dispatch: {}       # 允許手動觸發
 
-# 🔴 這行很重要：允許 workflow 寫入內容，才能 push last_hash.txt
+# 允許 workflow 寫入 repo（才能 commit last_hash.txt）
 permissions:
   contents: write
 
 jobs:
   run:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main   # 明確指定跑 main 分支
+          ref: main
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,25 +33,3 @@ jobs:
       - name: Create .env from secrets
         run: |
           echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
-          echo "TELEGRAM_USER_ID=${{ secrets.TELEGRAM_USER_ID }}" >> .env
-          echo "NOTION_URL=${{ secrets.NOTION_URL }}" >> .env
-
-      - name: Run script
-        run: python main.py
-        working-directory: ${{ github.workspace }}
-        
-      # ✅ 更穩的 commit 步驟：無論新檔或修改都會處理
-      - name: Commit last_hash if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # 總是 add（即使是新檔）
-          git add last_hash.txt || true
-          # 若有變更才 commit/push
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: update last_hash [skip ci]"
-            git push
-          else
-            echo "No changes to commit."
-          fi
-
