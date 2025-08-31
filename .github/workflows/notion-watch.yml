@@ -5,7 +5,6 @@ on:
     - cron: "0 0,12 * * *"   # 每天 UTC 00:00、12:00（台灣 08:00、20:00）
   workflow_dispatch: {}       # 允許手動觸發
 
-# 允許 workflow 寫入 repo（才能 commit last_hash.txt）
 permissions:
   contents: write
 
@@ -36,25 +35,22 @@ jobs:
           echo "TELEGRAM_USER_ID=${{ secrets.TELEGRAM_USER_ID }}" >> .env
           echo "NOTION_URL=${{ secrets.NOTION_URL }}" >> .env
 
-      # 🕵️‍♂️ 偵錯：確認 runner 看到的檔案、列出 main.py 前 60 行、找出誰印了 "Notion watcher is ready!"
+      # 🔎 這步會顯示 runner 目前目錄、列出檔案，並印出 main.py 前 60 行
       - name: Show workspace & peek main.py
         run: |
           echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
           pwd
           ls -la
-          echo "----- tree (top level) -----"
-          ls -la .
           echo "----- first 60 lines of ./main.py -----"
           sed -n '1,60p' ./main.py
-          echo "----- search for 'Notion watcher is ready!' -----"
+          echo "----- search for 'Notion watcher is ready!' in repo -----"
           grep -Rni "Notion watcher is ready!" . || true
 
-      # ✅ 強制執行 repo 根目錄的 main.py（避免跑到系統中同名檔）
+      # ✅ 強制執行 repo 根目錄的 main.py
       - name: Run script
         run: python ./main.py
         working-directory: ${{ github.workspace }}
 
-      # 若 last_hash.txt 有變更就 commit 回 repo
       - name: Commit last_hash if changed
         run: |
           git config user.name "github-actions[bot]"
