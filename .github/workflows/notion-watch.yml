@@ -2,8 +2,12 @@ name: Notion Watcher
 
 on:
   schedule:
-    - cron: "0 0,12 * * *"   # UTC 00:00、12:00 -> 台灣時間 08:00、20:00
-  workflow_dispatch: {}       # 允許手動觸發
+    - cron: "0 0,12 * * *"   # UTC 00:00、12:00 → 台灣 12:00、19:00
+  workflow_dispatch: {}
+
+# 🔴 這行很重要：允許 workflow 寫入內容，才能 push last_hash.txt
+permissions:
+  contents: write
 
 jobs:
   run:
@@ -17,7 +21,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -31,12 +35,18 @@ jobs:
       - name: Run script
         run: python main.py
 
+      # ✅ 更穩的 commit 步驟：無論新檔或修改都會處理
       - name: Commit last_hash if changed
         run: |
-          if [ -n "$(git status --porcelain last_hash.txt)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add last_hash.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 總是 add（即使是新檔）
+          git add last_hash.txt || true
+          # 若有變更才 commit/push
+          if ! git diff --cached --quiet; then
             git commit -m "chore: update last_hash [skip ci]"
             git push
+          else
+            echo "No changes to commit."
           fi
+
