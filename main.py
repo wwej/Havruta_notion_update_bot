@@ -3,8 +3,10 @@ import hashlib
 import os
 from bs4 import BeautifulSoup
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from telegram import Bot
+TZ = ZoneInfo("Asia/Taipei")
 
 print("[DEBUG] running main.py from repo")
 
@@ -74,7 +76,7 @@ def send_telegram_message(message):
         print(f"[TG] send error: {e}")
 
 def main():
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S")
     print(f"[Run] check at {now}")
     print(f"[Run] NOTION_URL={NOTION_URL}")
 

@@ -12,7 +12,8 @@ permissions:
 jobs:
   run:
     runs-on: ubuntu-latest
-
+    env:
+      TZ: Asia/Taipei
     steps:
       - name: Checkout repo (main)
         uses: actions/checkout@v4
