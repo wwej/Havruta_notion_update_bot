@@ -35,7 +35,6 @@ jobs:
           echo "TELEGRAM_USER_ID=${{ secrets.TELEGRAM_USER_ID }}" >> .env
           echo "NOTION_URL=${{ secrets.NOTION_URL }}" >> .env
 
-      # 🔎 這步會顯示 runner 目前目錄、列出檔案，並印出 main.py 前 60 行
       - name: Show workspace & peek main.py
         run: |
           echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
@@ -46,7 +45,6 @@ jobs:
           echo "----- search for 'Notion watcher is ready!' in repo -----"
           grep -Rni "Notion watcher is ready!" . || true
 
-      # ✅ 強制執行 repo 根目錄的 main.py
       - name: Run script
         run: python ./main.py
         working-directory: ${{ github.workspace }}
