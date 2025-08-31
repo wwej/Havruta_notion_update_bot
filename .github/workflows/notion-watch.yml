@@ -1,0 +1,42 @@
+name: Notion Watcher
+
+on:
+  schedule:
+    - cron: "0 0,12 * * *"   # 每天 UTC 00:00、12:00 → 台灣時間 08:00、20:00
+  workflow_dispatch: {}       # 允許手動觸發測試
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create .env from secrets
+        run: |
+          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+          echo "TELEGRAM_USER_ID=${{ secrets.TELEGRAM_USER_ID }}" >> .env
+          echo "NOTION_URL=${{ secrets.NOTION_URL }}" >> .env
+
+      - name: Run script
+        run: python main.py
+
+      - name: Commit last_hash if changed
+        run: |
+          if [ -n "$(git status --porcelain last_hash.txt)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add last_hash.txt
+            git commit -m "chore: update last_hash [skip ci]"
+            git push
+          fi
