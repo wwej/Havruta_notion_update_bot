@@ -44,4 +44,25 @@ jobs:
           ls -la
           echo "----- tree (top level) -----"
           ls -la .
-          echo "----- first 60 lines of
+          echo "----- first 60 lines of ./main.py -----"
+          sed -n '1,60p' ./main.py
+          echo "----- search for 'Notion watcher is ready!' -----"
+          grep -Rni "Notion watcher is ready!" . || true
+
+      # ✅ 強制執行 repo 根目錄的 main.py（避免跑到系統中同名檔）
+      - name: Run script
+        run: python ./main.py
+        working-directory: ${{ github.workspace }}
+
+      # 若 last_hash.txt 有變更就 commit 回 repo
+      - name: Commit last_hash if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_hash.txt || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update last_hash [skip ci]"
+            git push
+          else
+            echo "No changes to commit."
+          fi
