@@ -87,6 +87,12 @@ def main():
     current_hash = get_content_hash(content)
     last_hash = load_last_hash()
     print(f"[Hash] current={current_hash[:10]}..., last={str(last_hash)[:10] if last_hash else 'None'}")
+    
+    if last_hash is None:
+    save_current_hash(current_hash)
+    send_telegram_message(f"🟢 已建立監看（{now}）。")
+    print("[Run] baseline created")
+    return
 
     # 只擷取前 300 字做通知
     snippet = content.strip().replace("\n\n", "\n")

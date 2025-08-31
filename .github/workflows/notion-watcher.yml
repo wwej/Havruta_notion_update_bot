@@ -2,8 +2,9 @@ name: Notion Watcher
 
 on:
   schedule:
-    - cron: "0 0,12 * * *"   # 每天 UTC 00:00、12:00（台灣 08:00、20:00）
-  workflow_dispatch: {}       # 允許手動觸發
+    - cron: "0 4,10 * * *"   # 每天 UTC 04:00、10:00 → 台灣 12:00、18:00
+  workflow_dispatch: {}
+
 
 permissions:
   contents: write
