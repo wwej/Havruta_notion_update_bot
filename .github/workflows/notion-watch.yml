@@ -36,7 +36,8 @@ jobs:
 
       - name: Run script
         run: python main.py
-
+        working-directory: ${{ github.workspace }}
+        
       # ✅ 更穩的 commit 步驟：無論新檔或修改都會處理
       - name: Commit last_hash if changed
         run: |

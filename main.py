@@ -6,6 +6,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Bot
 
+print("[DEBUG] running main.py from repo")
+
 # 載入 .env
 load_dotenv()
 
